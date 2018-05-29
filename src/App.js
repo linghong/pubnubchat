@@ -41,8 +41,7 @@ class App extends Component {
             presence: function(data) {
                 console.log("action", data);
                 if(data.action==="join"){
-                    console.log("user join", data);
-                    
+                    console.log("user join", data);                    
                 } else if(data.action==="timeout"||data.action==="leave"){
                     console.log("user leave", data);
                     
@@ -54,7 +53,6 @@ class App extends Component {
       }
 
     enterChatRoom = ()=>{
-        console.log("join");
         var roomName ="me";
         this.PubNub.hereNow(
             {
@@ -97,10 +95,10 @@ class App extends Component {
                   <h1 className="App-title">Chat Room</h1>
                 </header>
                 { 
-                    this.state.chatOpen?<div>
-                      <div className="chat-area"></div>
-                      <button onClick={ this.leaveChatRoom } > leave ChatRoom</button>
-                    </div>:<button className="App-intro" onClick ={ this.enterChatRoom } >
+                    this.state.chatOpen?<div className="chat-room">                         
+                      <div className="chat-area"></div> 
+                      <button onClick={ this.leaveChatRoom } className="room-button" > leave ChatRoom</button>                        
+                    </div>:<button className="room-list" onClick ={ this.enterChatRoom } >
                       Enter into ChatRoom
                     </button>
                 }

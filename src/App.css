@@ -2,15 +2,11 @@
   text-align: center;
 }
 
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 80px;
-}
-
 .App-header {
   background-color: #222;
-  height: 150px;
+  height: 50px;
   padding: 20px;
+  margin-bottom:50px;
   color: white;
 }
 
@@ -18,13 +14,20 @@
   font-size: 1.5em;
 }
 
-.App-intro {
+.room-list {
+  margin-top: 20px;
   font-size: large;
 }
 
 .chat-area{
   width: 80%;
-  height:100px;
-  background-color: #ffe6e6;
+  height: 150px;
+  background-color: #f1f4f5;
   border: solid 2px #660000;
+  margin: auto;
+}
+
+.room-button{
+  margin-top: 20px;
+  font-size: large;
 }
