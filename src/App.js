@@ -3,29 +3,43 @@ import PubNub from 'pubnub';
 import './App.css';
 
 class App extends Component {
-    state ={
-        chatOpen: false
+    state = {
+        chatOpen: false,
+        user: { 
+            userName: "me",
+            status: "good"
+        } ,
+        roomName: null
     }
 
     componentDidMount(){
-        const user = { 
-            userName: "me",
-            status: "good"
-        } 
-
         this.PubNub = new PubNub({
             publish_key: 'pub-c-a2ba88c3-d357-4572-8781-223d204e3577',
             subscribe_key: 'sub-c-3b25421e-5ab4-11e8-89ba-521aa9825b79',
-            uuid: user.userName
+            uuid: this.state.user.userName
         });
+      }
 
-        var self =this;        
-               
-        this.PubNub.addListener({
+    hereNow = roomName=> this.PubNub.hereNow(
+            {
+              channels: [roomName],
+              includeUUIDs: true,
+              includeState: true
+            },
+            function (status, response) {  
+                var res =response.channels[roomName];
+                console.log("occupants",  response, res.name, res.occupants);                               
+            }
+        );
+
+    getListener = (roomName, user)=> {
+        var self =this
+        return{
             status: function(statusEvent) {
                 if (statusEvent.category === "PNConnectedCategory") {                  
                     self.PubNub.setState(
                         { 
+                            channels: [roomName],
                             state: user,
                             uuid: user.userName 
                         }, 
@@ -39,7 +53,7 @@ class App extends Component {
                             
             },
             presence: function(data) {
-                console.log("action", data);
+
                 if(data.action==="join"){
                     console.log("user join", data);                    
                 } else if(data.action==="timeout"||data.action==="leave"){
@@ -49,36 +63,13 @@ class App extends Component {
                     console.log("this is state change");
                 }
             }
-        });
-      }
-
-    enterChatRoom = ()=>{
-        var roomName ="me";
-        this.PubNub.hereNow(
-            {
-              channels: [roomName],
-              includeUUIDs: true,
-              includeState: true
-            },
-            function (status, response) {  
-                var res =response.channels[roomName];
-                console.log("occupants",  response, res.name, res.occupants);                               
-            }
-        );
-
-        this.PubNub.subscribe({
-            channels: [roomName],
-            withPresence: true 
-        });
-        
-        this.setState({
-            chatOpen: true
-        });      
+        }      
     }
 
     leaveChatRoom = ()=>{
         console.log("leave");
         const roomName ="me";
+        this.PubNub.removeListener(this.listener)
         this.PubNub.unsubscribe({
             channels: [roomName]
         }); 
@@ -87,6 +78,24 @@ class App extends Component {
         });
     }
 
+    handleRoomEnter = (e)=>{
+        var roomName = e.target.getAttribute('value');
+        this.listener = this.getListener(roomName, this.state.user );    
+        this.PubNub.addListener(this.listener);
+        this.PubNub.subscribe({
+            channels: [roomName],
+            withPresence: true 
+        });
+        
+        this.setState({
+            chatOpen: true, 
+            roomName: roomName
+        });      
+    }
+
+    fetchUserList =()=>{
+       this.hereNow(this.state.roomName); 
+    }
  
     render() {
         return (
@@ -95,12 +104,23 @@ class App extends Component {
                   <h1 className="App-title">Chat Room</h1>
                 </header>
                 { 
-                    this.state.chatOpen?<div className="chat-room">                         
+                    this.state.chatOpen?<div className="chat-room"> 
+                    <button className="participant-list" onClick = {this.fetchUserList}>View Participants</button>                        
                       <div className="chat-area"></div> 
-                      <button onClick={ this.leaveChatRoom } className="room-button" > leave ChatRoom</button>                        
-                    </div>:<button className="room-list" onClick ={ this.enterChatRoom } >
-                      Enter into ChatRoom
-                    </button>
+                      <button onClick={ this.leaveChatRoom } className="room-button" > {`leave ${this.state.roomName}`}</button>
+
+                    </div>:
+                    <ul onClick = { this.handleRoomEnter }>
+                        <li className="room-list" value ="Chat Room1">
+                          ChatRoom1
+                        </li>
+                        <li className="room-list" value="Chat Room 2">
+                          ChatRoom2
+                        </li>
+                        <li className="room-list" value="Chat Room 3">
+                          ChatRoom3
+                        </li>
+                    </ul>
                 }
             </div>
         );

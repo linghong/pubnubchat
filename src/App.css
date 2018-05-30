@@ -31,3 +31,13 @@
   margin-top: 20px;
   font-size: large;
 }
+
+.participant-list{
+
+  margin-bottom: 5px;
+  font-size: medium;
+}
+
+li {
+   list-style-type: none;
+}
